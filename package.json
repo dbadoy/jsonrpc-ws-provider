@@ -1,0 +1,15 @@
+{
+  "name": "jsonrpc-ws-provider",
+  "version": "0.0.1",
+  "description": "JSON-RPC WebSocket Provider to get results synchronously.",
+  "main": "index.js",
+  "scripts": {},
+  "author": "dbadoy",
+  "devDependencies": {
+    "@types/node": "^20.11.28",
+    "@types/ws": "^8.5.10"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
