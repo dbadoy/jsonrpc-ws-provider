@@ -262,13 +262,12 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
       const requestId = (response as unknown as JsonRpcResponseWithResult).id;
       const requestItem = this._sentRequestsQueue.get(requestId);
 
-      if (!requestItem) {
-        return;
+      if (requestItem) {
+        requestItem.deferredPromise.resolve(response);
+        this._sentRequestsQueue.delete(requestId);
       }
 
       this.emit('message', response);
-      requestItem.deferredPromise.resolve(response);
-      this._sentRequestsQueue.delete(requestId);
     }
   }
 
