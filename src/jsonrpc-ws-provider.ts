@@ -251,6 +251,7 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
 
   private _onConnect() {
     this._connectionStatus = 'connected';
+    this.emit('connect');
     this._sendPendingRequests();
   }
 
