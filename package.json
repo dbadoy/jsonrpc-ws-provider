@@ -1,15 +1,19 @@
 {
   "name": "jsonrpc-ws-provider",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "JSON-RPC WebSocket Provider to get results synchronously.",
-  "main": "index.js",
-  "scripts": {},
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc --build .",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
   "author": "dbadoy",
   "devDependencies": {
     "@types/node": "^20.11.28",
     "@types/ws": "^8.5.10"
   },
   "dependencies": {
+    "typescript": "^5.4.5",
     "ws": "^8.16.0"
   }
 }
