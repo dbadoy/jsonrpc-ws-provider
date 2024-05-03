@@ -20,3 +20,33 @@ const res2 = await cosmosWsProvider.request({
     params: [],
 });
 ```
+
+Subscribe example
+```typescript
+const NewBlockHeaderSubId = 'new_block_header_id';
+
+const cosmosWsProvider = new JsonRpcWebSocketProvider('wss://{cosmos-sdk}/websocket');
+cosmosWsProvider.request({
+    method: 'subscribe',
+    params: ["tm.event = 'NewBlockHeader'"],
+    jsonrpc: '2.0',
+    id: NewBlockHeaderSubId,
+});
+
+cosmosWsProvider.on(
+    'message',
+    async (jsonrpcRes: JsonRpcResponseWithResult<any>) => {
+        if (Object.keys(jsonrpcRes?.result).length !== 0) {
+            if (jsonrpcRes?.id === NewBlockHeaderSubId) {
+                const newBlockHeader = jsonrpcRes?.result?.data;
+                if (newBlockHeader?.type !== 'tendermint/event/NewBlockHeader') {
+                    throw new Error('Invalid event type');
+                }
+                const height = newBlockHeader?.value?.header?.height;
+
+                console.log(`new block detected ${height}`);
+            }
+        }
+    }
+);
+```
