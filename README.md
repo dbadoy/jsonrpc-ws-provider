@@ -1,7 +1,7 @@
 # jsonrpc-ws-provider
 JSON-RPC WebSocket Provider to get results synchronously.
 
-Most of the code is taken from [web3.js](https://github.com/web3/web3.js/tree/4.x/packages/web3-providers-ws), and I modified the Ethereum-specific implementation to make it universally usable with JSONRPC.
+Most of the code is taken from [web3.js](https://github.com/web3/web3.js/tree/4.x/packages/web3-providers-ws), and I modified the Ethereum-specific implementation to make it universally usable with JSON-RPC.
 
 ### Installation
 https://www.npmjs.com/package/jsonrpc-ws-provider
