@@ -10,6 +10,8 @@ import {
     PendingRequestsOnReconnectingError,
 } from './execption';
 
+const NORMAL_CLOSE_CODE = 1000; // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close
+
 export interface SocketRequestItem<T> {
     payload: any;
     deferredPromise: DeferredPromiseInterface<JsonRpcResponse<T>>;
@@ -31,6 +33,10 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
     protected isReconnecting: boolean;
 
     private _socketConnection?: Websocket;
+    public get SocketConnection() {
+        return this._socketConnection;
+    }
+
     private readonly _socketPath: string;
 
     protected readonly chunkResponseParser: ChunkResponseParser;
@@ -87,6 +93,28 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
         this._socketConnection = new Websocket(this._socketPath, undefined, undefined);
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    public getPendingRequestQueueSize() {
+        return this._pendingRequestsQueue.size;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    public getSentRequestsQueueSize() {
+        return this._sentRequestsQueue.size;
+    }
+
+    /**
+     * Resets the socket, removing all listeners and pending requests
+     */
+    public reset(): void {
+        this._sentRequestsQueue.clear();
+        this._pendingRequestsQueue.clear();
+
+        this._init();
+        this._removeSocketListeners();
+        this._addSocketListeners();
+    }
+
     protected _reconnect(): void {
         if (this.isReconnecting) {
             return;
@@ -136,6 +164,15 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
                 });
             }
         }
+    }
+
+    public disconnect(code?: number, data?: string): void {
+        const disconnectCode = code ?? NORMAL_CLOSE_CODE;
+        this._removeSocketListeners();
+        if (this.getStatus() !== 'disconnected') {
+            this._closeSocketConnection(disconnectCode, data);
+        }
+        this._onDisconnect(disconnectCode, data);
     }
 
     async request<T>(request: JsonRpcRequest): Promise<JsonRpcResponse<T>> {
@@ -247,6 +284,10 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
     protected _onError(event: Websocket.ErrorEvent): void {
         // do not emit error while trying to reconnect
         this.emit('error', event);
+    }
+
+    protected _closeSocketConnection(code?: number, data?: string) {
+        this._socketConnection?.close(code, data);
     }
 
     private _sendPendingRequests() {
