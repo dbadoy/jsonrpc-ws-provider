@@ -9,7 +9,7 @@ export class ChunkResponseParser {
     private _clearQueues: (() => void) | undefined;
     private readonly eventEmitter: EventEmitter;
     private readonly autoReconnect: boolean;
-    private readonly chunkTimout: number;
+    private chunkTimout: number;
 
     public constructor(eventEmitter: EventEmitter, autoReconnect: boolean) {
         this.eventEmitter = eventEmitter;
@@ -24,6 +24,11 @@ export class ChunkResponseParser {
 
     public onError(clearQueues?: () => void) {
         this._clearQueues = clearQueues;
+    }
+
+    // Method for test.
+    private setChunkTimeout(ms: number) {
+        this.chunkTimout = ms;
     }
 
     public parseResponse(data: string): JsonRpcResponse[] {
