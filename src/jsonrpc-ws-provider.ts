@@ -9,6 +9,7 @@ import {
     MaxAttemptsReachedOnReconnectingError,
     PendingRequestsOnReconnectingError,
 } from './execption';
+import { sleep } from './utils/time';
 
 const NORMAL_CLOSE_CODE = 1000; // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close
 
@@ -21,12 +22,14 @@ export type ReconnectOptions = {
     autoReconnect: boolean;
     delay: number;
     maxAttempts: number;
+    disconnectCheckInterval?: number; // default: 3s
 };
 
-const DEFAULT_RECONNECTION_OPTIONS = {
+const DEFAULT_RECONNECTION_OPTIONS: ReconnectOptions = {
     autoReconnect: true,
     delay: 5000,
     maxAttempts: 5,
+    disconnectCheckInterval: 3000,
 };
 
 export class JsonRpcWebSocketProvider extends EventEmitter {
@@ -63,6 +66,10 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
             ...DEFAULT_RECONNECTION_OPTIONS,
             ...(reconnectOptions ?? {}),
         };
+
+        if (this._reconnectOptions.autoReconnect) {
+            this.autoReconnectLoop();
+        }
 
         this._socketConnection = new Websocket(this._socketPath);
 
@@ -180,7 +187,7 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
             throw new Error('Connection is undefined');
         }
 
-        if (this.getStatus() === 'disconnected') {
+        if (!this._reconnectOptions.autoReconnect && this.getStatus() === 'disconnected') {
             this.connect();
         }
 
@@ -232,6 +239,16 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
             }
         }
         return 'disconnected';
+    }
+
+    private async autoReconnectLoop(): Promise<void> {
+        while (1) {
+            // Ignore the _reconnect method if it is being performed.
+            if (!this.isReconnecting && this.getStatus() === 'disconnected') {
+                this.connect();
+            }
+            await sleep(this._reconnectOptions.disconnectCheckInterval ?? 3000);
+        }
     }
 
     private _addSocketListeners(): void {
