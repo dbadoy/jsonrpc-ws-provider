@@ -25,7 +25,7 @@ export type ReconnectOptions = {
 
     /**
      * disconnectionCheckInterval is the interval option for the
-     * connection method trigger loop. This allows you to quickly
+     * 'connect' method trigger loop. This allows you to quickly
      * attempt to connect when disconnected, even if 'request` is
      * not called.
      *
