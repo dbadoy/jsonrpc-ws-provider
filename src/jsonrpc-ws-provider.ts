@@ -22,14 +22,23 @@ export type ReconnectOptions = {
     autoReconnect: boolean;
     delay: number;
     maxAttempts: number;
-    disconnectCheckInterval?: number; // default: 3s
+
+    /**
+     * disconnectionCheckInterval is the interval option for the
+     * connection method trigger loop. This allows you to quickly
+     * attempt to connect when disconnected, even if 'request` is
+     * not called.
+     *
+     * If not set, the connection will be attempted when the
+     * 'request' is called, even if the connection is lost.
+     */
+    disconnectionCheckInterval?: number;
 };
 
 const DEFAULT_RECONNECTION_OPTIONS: ReconnectOptions = {
     autoReconnect: true,
     delay: 5000,
     maxAttempts: 5,
-    disconnectCheckInterval: 3000,
 };
 
 export class JsonRpcWebSocketProvider extends EventEmitter {
@@ -67,8 +76,8 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
             ...(reconnectOptions ?? {}),
         };
 
-        if (this._reconnectOptions.autoReconnect) {
-            this.autoReconnectLoop();
+        if (this._reconnectOptions.disconnectionCheckInterval) {
+            this._disconnectionCheckLoop();
         }
 
         this._socketConnection = new Websocket(this._socketPath);
@@ -187,7 +196,7 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
             throw new Error('Connection is undefined');
         }
 
-        if (!this._reconnectOptions.autoReconnect && this.getStatus() === 'disconnected') {
+        if (!this._reconnectOptions.disconnectionCheckInterval && this.getStatus() === 'disconnected') {
             this.connect();
         }
 
@@ -244,13 +253,19 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
     // If Status is 'disconnected', this is a loop that will
     // automatically attempt to connect even if you don't call
     // 'request'.
-    private async autoReconnectLoop(): Promise<void> {
+    private async _disconnectionCheckLoop(): Promise<void> {
+        if (!this._reconnectOptions.disconnectionCheckInterval) {
+            throw new Error(
+                'autoReconnectLoop should only be called if disconnectionCheckInterval is set (error for developers)',
+            );
+        }
+
         while (1) {
             // Ignore the _reconnect method if it is being performed.
             if (!this.isReconnecting && this.getStatus() === 'disconnected') {
                 this.connect();
             }
-            await sleep(this._reconnectOptions.disconnectCheckInterval ?? 3000);
+            await sleep(this._reconnectOptions.disconnectionCheckInterval);
         }
     }
 
