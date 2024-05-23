@@ -241,6 +241,9 @@ export class JsonRpcWebSocketProvider extends EventEmitter {
         return 'disconnected';
     }
 
+    // If Status is 'disconnected', this is a loop that will
+    // automatically attempt to connect even if you don't call
+    // 'request'.
     private async autoReconnectLoop(): Promise<void> {
         while (1) {
             // Ignore the _reconnect method if it is being performed.
