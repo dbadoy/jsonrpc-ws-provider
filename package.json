@@ -7,6 +7,10 @@
     "build": "npx tsc --build .",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*ts\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbadoy/jsonrpc-ws-provider.git"
+  },
   "author": "dbadoy",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
