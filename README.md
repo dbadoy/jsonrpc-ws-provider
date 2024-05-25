@@ -65,6 +65,7 @@ This can cause unintended behavior if you have set up logic for when you receive
 With the existing logic, this means that the `onReconnect` method will not be executed until you call `request`, and you could lose data in the meantime! <br>
 In this case, setting the `disconnectionCheckInterval` value will cause the `onReconnect` method to be executed after the set interval instead of waiting for the `request` to be called.
 
+(onReconnect example)
 ```typescript
 async function onReconnect(provider: JsonRpcWebSocketProvider): Promise<void> {
     // Recover logic
