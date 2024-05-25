@@ -58,3 +58,42 @@ cosmosWsProvider.on(
     }
 );
 ```
+
+### disconnectionCheckInterval
+The default logic is to try to connect when the `request` method is called if the connection is lost. <br>
+This can cause unintended behavior if you have set up logic for when you receive a reconnection event. For example, let's say you're making a subscribe request to an endpoint and periodically polling it for values. For reliability, you implemented the `onReconnect` method to make a subscribe request when the connection is disconnected and reconnected. <br>
+With the existing logic, this means that the `onReconnect` method will not be executed until you call `request`, and you could lose data in the meantime! <br>
+In this case, setting the `disconnectionCheckInterval` value will cause the `onReconnect` method to be executed after the set interval instead of waiting for the `request` to be called.
+
+(onReconnect example)
+```typescript
+async function onReconnect(provider: JsonRpcWebSocketProvider): Promise<void> {
+    // Recover logic
+    // ...
+
+    subscribeNewBlockHeader(provider);
+}
+
+async function subscribeNewBlockHeader(provider: JsonRpcWebSocketProvider): Promise<void> {
+    provider.request({
+        method: 'subscribe',
+        params: ["tm.event = 'NewBlockHeader'"],
+        jsonrpc: '2.0',
+        id: NewBlockHeaderSubId,
+    });
+
+    provider.once('connect', onReconnect);
+}
+
+async function detectNewBlockHeader(provider: JsonRpcWebSocketProvider): Promise<void> {
+    subscribeNewBlockHeader(provider);
+
+    provider.on(
+        'message',
+        async (response: any) => {
+            // Handle response
+            // ...
+        },
+    );
+}
+```
