@@ -1,6 +1,6 @@
 {
   "name": "jsonrpc-ws-provider",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "JSON-RPC WebSocket Provider to get results synchronously.",
   "main": "dist/index.js",
   "scripts": {
@@ -22,6 +22,6 @@
   "dependencies": {
     "@types/jest": "^29.5.12",
     "typescript": "^5.4.5",
-    "ws": "^8.16.0"
+    "ws": "^8.17.1"
   }
 }
